@@ -1,23 +1,19 @@
 pipeline {
     agent any
-        
-    
-
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "maven"
+    }
     stages {
-        stage('Hello') {
+        stage('git clone') {
             steps {
-                echo 'Hello World'
-            }
-        }
-        stage('Git clone') {
-            steps {
-                git 'https://github.com/devopsintellipaat/jenkins-ansible.git'
+                git branch: 'main', url: 'https://github.com/devopsintellipaat/jenkins_ansible_CM.git'
+                sh "mvn -Dmaven.test.failure.ignore=true clean install"
             }
         }
         stage('ansible task') {
             steps {
-                ansiblePlaybook become: true, credentialsId: 'dev', disableHostKeyChecking: true, installation: 'ansible', inventory: 'dev.inv', playbook: 'ansible-playbook.yml'
-             
+                ansiblePlaybook credentialsId: 'ansible-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'dev.inv', playbook: 'playbook.yml'
             }
         }
     }
